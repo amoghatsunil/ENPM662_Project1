@@ -21,6 +21,9 @@ install(
     DIRECTORY include/project1phase1
     DESTINATION include
     )
+install(PROGRAMS scripts/keyboard_control.py
+        DESTINATION lib/${PROJECT_NAME})
+
 install(
     PROGRAMS
     launch/robot_description_publisher.py
