@@ -29,6 +29,10 @@ install(
     launch/robot_description_publisher.py
     DESTINATION lib/${PROJECT_NAME}
     )
+install(PROGRAMS
+  scripts/straight_line_controller.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 find_package(robot_state_publisher REQUIRED)
 find_package(xacro REQUIRED)
 find_package(tf2 REQUIRED)
