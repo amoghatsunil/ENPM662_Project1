@@ -23,7 +23,7 @@ class StraightLineController(Node):
 
      
         self.declare_parameter('goal_x', 10.0)
-        self.declare_parameter('goal_y', 0..0)
+        self.declare_parameter('goal_y', 0.0)
         self.declare_parameter('kv', 0.6)        
         self.declare_parameter('kh', 1.8)          
         self.declare_parameter('max_v', 5.0)       
