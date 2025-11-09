@@ -12,7 +12,7 @@ from geometry_msgs.msg import Quaternion
 def yaw_from_quat(q: Quaternion) -> float:
     # Convert quaternion to yaw
     siny_cosp = 2.0 * (q.w * q.z + q.x * q.y)
-    cosy_cosp = 1.0 - 2.0 * (q.y * q.y + q.z * q.z)
+    cosy_cosp = -1.0 + 2.0 * (q.y * q.y + q.z * q.z)
     return math.atan2(siny_cosp, cosy_cosp)
 
 def clamp(x, lo, hi): return max(lo, min(hi, x))
@@ -23,11 +23,11 @@ class StraightLineController(Node):
 
      
         self.declare_parameter('goal_x', 10.0)
-        self.declare_parameter('goal_y', 0.0)
-        self.declare_parameter('kv', 0.6)        
-        self.declare_parameter('kh', 1.8)          
-        self.declare_parameter('max_v', 5.0)       
-        self.declare_parameter('max_steer', 0.6)  
+        self.declare_parameter('goal_y', 10.0)
+        self.declare_parameter('kv', 0.4)        
+        self.declare_parameter('kh', 0.6)          
+        self.declare_parameter('max_v', 6.0)       
+        self.declare_parameter('max_steer', 0.2)  
         self.declare_parameter('arrive_thresh', 0.20)
 
         self.goal_x = float(self.get_parameter('goal_x').value)
@@ -69,9 +69,9 @@ class StraightLineController(Node):
             self.publish_cmds(0.0, 0.0)
             return
 
-        dx = self.goal_x - self.x
-        dy = self.goal_y - self.y
-        dist = math.hypot(dx, dy)
+        dx = (self.goal_x - self.x)
+        dy = (self.goal_y - self.y)
+        dist = math.sqrt(dx*dx + dy*dy)
 
         if dist < self.arrive_thresh:
             self.arrived = True
@@ -80,7 +80,9 @@ class StraightLineController(Node):
             return
 
         # Desired heading and heading error
-        heading = math.atan2(dy, dx)
+        heading = math.atan2(dx, dy)
+        print(heading)
+        print(self.yaw)
         err = self.normalize_angle(heading - self.yaw)
 
         # Proportional controllers

@@ -455,7 +455,6 @@
   </sensor>
 </gazebo>
 
-
   <!-- ===== ros2_control (only controllable joints) ===== -->
   <ros2_control name="GazeboSystem" type="system">
     <hardware><plugin>gazebo_ros2_control/GazeboSystem</plugin></hardware>
@@ -484,6 +483,30 @@
   <gazebo>
     <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
       <parameters>$(find project1phase1)/config/control.yaml</parameters>
+    </plugin>
+  </gazebo>
+  
+  <!-- ===== Ground-truth odometry plugin (p3d) ===== -->
+  <gazebo>
+    <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so">
+      <!-- ROS 2 namespace + topic remap -->
+      <ros>
+        <!-- keep at root ns -->
+        <namespace>/</namespace>
+        <!-- p3d publishes "odom" by default; this line is optional but explicit -->
+        <remapping>odom:=odom</remapping>
+      </ros>
+
+      <!-- IMPORTANT: this must be the actual Gazebo body name -->
+      <body_name>dummy_link</body_name>
+
+      <!-- TF frame that /odom is expressed in -->
+      <frame_name>map</frame_name>
+
+      <update_rate>50.0</update_rate>
+      <gaussian_noise>0.01</gaussian_noise>
+      <xyz_offsets>0 0 0</xyz_offsets>
+      <rpy_offsets>0 0 0</rpy_offsets>
     </plugin>
   </gazebo>
 

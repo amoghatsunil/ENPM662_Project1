@@ -18,7 +18,7 @@ def generate_launch_description():
     world = os.path.join(
         get_package_share_directory('project1phase1'),
         'worlds',
-        'competition_arena.world'
+        'empty_world.world'
     )
 
     # Launch Description to run Gazebo Server
