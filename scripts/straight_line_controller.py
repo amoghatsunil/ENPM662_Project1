@@ -21,10 +21,10 @@ class StraightLineController(Node):
     def __init__(self):
         super().__init__('straight_line_controller')
 
-     
+        
         self.declare_parameter('goal_x', 10.0)
         self.declare_parameter('goal_y', 10.0)
-        self.declare_parameter('kv', 0.4)        
+        self.declare_parameter('kv', 2.4)        
         self.declare_parameter('kh', 0.6)          
         self.declare_parameter('max_v', 6.0)       
         self.declare_parameter('max_steer', 0.2)  
@@ -54,6 +54,9 @@ class StraightLineController(Node):
         self.y = 0.0
         self.yaw = 0.0
         self.arrived = False
+        
+        self.traj_x = []
+        self.traj_y = []
 
         # Control loop timer (20 Hz)
         self.timer = self.create_timer(0.05, self.control_step)
@@ -65,6 +68,8 @@ class StraightLineController(Node):
         self.yaw = yaw_from_quat(msg.pose.pose.orientation)
 
     def control_step(self):
+        self.traj_x.append(self.x)
+        self.traj_y.append(self.y)
         if self.arrived:
             self.publish_cmds(0.0, 0.0)
             return
@@ -77,12 +82,11 @@ class StraightLineController(Node):
             self.arrived = True
             self.get_logger().info('Goal reached. Stopping.')
             self.publish_cmds(0.0, 0.0)
+            self.plot_trajectory()
             return
 
         # Desired heading and heading error
         heading = math.atan2(dx, dy)
-        print(heading)
-        print(self.yaw)
         err = self.normalize_angle(heading - self.yaw)
 
         # Proportional controllers
@@ -103,6 +107,35 @@ class StraightLineController(Node):
         while a > math.pi: a -= 2.0 * math.pi
         while a < -math.pi: a += 2.0 * math.pi
         return a
+    
+    def plot_trajectory(self):
+        try:
+            import matplotlib.pyplot as plt
+        except ImportError:
+            self.get_logger().warn("matplotlib not installed; skipping trajectory plot.")
+            return
+
+        if not self.traj_x:
+            self.get_logger().warn("No trajectory points recorded; nothing to plot.")
+            return
+
+        plt.figure()
+        plt.plot(self.traj_x, self.traj_y, marker='.', linewidth=1.0, label='Trajectory')
+        plt.scatter([self.traj_x[0]], [self.traj_y[0]], label='Start', marker='o')
+        plt.scatter([self.goal_x], [self.goal_y], label='Goal', marker='x')
+        plt.xlabel('x [m]')
+        plt.ylabel('y [m]')
+        plt.title('Truck trajectory')
+        plt.legend()
+        plt.axis('equal')
+        plt.grid(True)
+
+        # Save to file in current working directory
+        outfile = 'trajectory.png'
+        plt.savefig(outfile, dpi=150)
+        self.get_logger().info(f"Saved trajectory plot to {outfile}")
+
+        plt.show()
 
 def main(args=None):
     rclpy.init(args=args)
